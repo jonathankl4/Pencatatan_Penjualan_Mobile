@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/expense_provider.dart';
+import '../../models/expense.dart';
 import '../../core/utils/validators.dart';
 import '../../core/utils/date_helper.dart';
-import '../../widgets/common/app_button.dart';
 import '../../widgets/common/app_text_field.dart';
 
 class ExpenseFormScreen extends StatefulWidget {
-  const ExpenseFormScreen({super.key});
+  final Expense? expense;
+
+  const ExpenseFormScreen({super.key, this.expense});
 
   @override
   State<ExpenseFormScreen> createState() => _ExpenseFormScreenState();
@@ -24,6 +26,18 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
   bool _isLoading = false;
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.expense != null) {
+      _nameController.text = widget.expense!.name;
+      _amountController.text = widget.expense!.amount.toStringAsFixed(0);
+      _categoryController.text = widget.expense!.category;
+      _notesController.text = widget.expense!.notes ?? '';
+      _selectedDate = DateTime.tryParse(widget.expense!.expenseDate) ?? DateTime.now();
+    }
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _amountController.dispose();
@@ -37,13 +51,20 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
       setState(() => _isLoading = true);
       
       final provider = context.read<ExpenseProvider>();
-      final success = await provider.addExpense({
+      final expenseData = {
         'name': _nameController.text,
         'amount': double.parse(_amountController.text),
         'category': _categoryController.text,
         'notes': _notesController.text,
         'expense_date': DateHelper.toIsoDate(_selectedDate),
-      });
+      };
+
+      final bool success;
+      if (widget.expense != null) {
+        success = await provider.updateExpense(widget.expense!.id, expenseData);
+      } else {
+        success = await provider.addExpense(expenseData);
+      }
 
       setState(() => _isLoading = false);
 
@@ -75,7 +96,7 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tambah Pengeluaran'),
+        title: Text(widget.expense != null ? 'Edit Pengeluaran' : 'Tambah Pengeluaran'),
         backgroundColor: Colors.red,
       ),
       body: SingleChildScrollView(
@@ -126,7 +147,7 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
                 ),
                 child: _isLoading 
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('Simpan Pengeluaran', style: TextStyle(color: Colors.white)),
+                    : Text(widget.expense != null ? 'Simpan Perubahan' : 'Simpan Pengeluaran', style: const TextStyle(color: Colors.white)),
               ),
             ],
           ),

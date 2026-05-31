@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import '../models/product.dart';
 import '../services/product_service.dart';
+import '../core/network/network_info.dart';
+import '../services/sync_service.dart';
 
 class ProductProvider with ChangeNotifier {
   final ProductService _productService = ProductService();
@@ -16,10 +18,29 @@ class ProductProvider with ChangeNotifier {
   Future<void> fetchProducts() async {
     _setLoading(true);
     try {
-      _products = await _productService.getProducts();
-      _error = null;
+      if (await NetworkInfo.isConnected) {
+        _products = await _productService.getProducts();
+        final rawList = _products.map((p) => p.toJson()).toList();
+        await SyncService.instance.cacheProducts(rawList);
+        _error = null;
+      } else {
+        final cached = await SyncService.instance.getCachedProducts();
+        if (cached != null) {
+          _products = cached.map((json) => Product.fromJson(json)).toList();
+          _error = null;
+        } else {
+          _products = [];
+          _error = "Offline. Data produk tidak ditemukan di cache.";
+        }
+      }
     } catch (e) {
-      _error = e.toString();
+      final cached = await SyncService.instance.getCachedProducts();
+      if (cached != null) {
+        _products = cached.map((json) => Product.fromJson(json)).toList();
+        _error = null;
+      } else {
+        _error = e.toString();
+      }
     } finally {
       _setLoading(false);
     }

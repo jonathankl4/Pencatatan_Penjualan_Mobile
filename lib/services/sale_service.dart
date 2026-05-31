@@ -49,4 +49,13 @@ class SaleService {
       throw Exception('Failed to load suggestions');
     }
   }
+
+  Future<Sale> updateSale(int id, Map<String, dynamic> data) async {
+    try {
+      final response = await _apiClient.dio.put('${ApiEndpoints.sales}/$id', data: data);
+      return Sale.fromJson(response.data['data']);
+    } on DioException catch (e) {
+      throw Exception(e.response?.data['message'] ?? 'Failed to update sale');
+    }
+  }
 }

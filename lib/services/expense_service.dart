@@ -6,9 +6,15 @@ import '../models/expense.dart';
 class ExpenseService {
   final ApiClient _apiClient = ApiClient();
 
-  Future<List<Expense>> getExpenses() async {
+  Future<List<Expense>> getExpenses({String? startDate, String? endDate}) async {
     try {
-      final response = await _apiClient.dio.get(ApiEndpoints.expenses);
+      final response = await _apiClient.dio.get(
+        ApiEndpoints.expenses,
+        queryParameters: {
+          if (startDate != null) 'start_date': startDate,
+          if (endDate != null) 'end_date': endDate,
+        },
+      );
       final List data = response.data['data'];
       return data.map((json) => Expense.fromJson(json)).toList();
     } catch (e) {

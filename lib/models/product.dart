@@ -22,4 +22,14 @@ class Product {
       isActive: json['is_active'] == 1 || json['is_active'] == true,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'cost_price': costPrice,
+      'sell_price': sellPrice,
+      'is_active': isActive ? 1 : 0,
+    };
+  }
 }

@@ -6,6 +6,9 @@ import 'core/theme/app_theme.dart';
 import 'core/constants/app_strings.dart';
 import 'providers/auth_provider.dart';
 
+import 'models/sale.dart';
+import 'models/expense.dart';
+
 import 'screens/auth/login_screen.dart';
 import 'screens/dashboard/dashboard_screen.dart';
 import 'screens/products/product_list_screen.dart';
@@ -54,21 +57,65 @@ class MyApp extends StatelessWidget {
         ),
         GoRoute(
           path: '/sales',
-          builder: (context, state) => const SaleListScreen(),
+          builder: (context, state) {
+            final searchQuery = state.uri.queryParameters['searchQuery'];
+            final startDateStr = state.uri.queryParameters['startDate'];
+            final endDateStr = state.uri.queryParameters['endDate'];
+            
+            DateTime? startDate;
+            DateTime? endDate;
+            if (startDateStr != null) {
+              startDate = DateTime.tryParse(startDateStr);
+            }
+            if (endDateStr != null) {
+              endDate = DateTime.tryParse(endDateStr);
+            }
+            
+            return SaleListScreen(
+              initialSearchQuery: searchQuery,
+              initialStartDate: startDate,
+              initialEndDate: endDate,
+              hasInitialFilters: searchQuery != null || startDateStr != null || endDateStr != null,
+            );
+          },
           routes: [
             GoRoute(
               path: 'form',
-              builder: (context, state) => const SaleFormScreen(),
+              builder: (context, state) {
+                final sale = state.extra as Sale?;
+                return SaleFormScreen(sale: sale);
+              },
             ),
           ],
         ),
         GoRoute(
           path: '/expenses',
-          builder: (context, state) => const ExpenseListScreen(),
+          builder: (context, state) {
+            final startDateStr = state.uri.queryParameters['startDate'];
+            final endDateStr = state.uri.queryParameters['endDate'];
+            
+            DateTime? startDate;
+            DateTime? endDate;
+            if (startDateStr != null) {
+              startDate = DateTime.tryParse(startDateStr);
+            }
+            if (endDateStr != null) {
+              endDate = DateTime.tryParse(endDateStr);
+            }
+            
+            return ExpenseListScreen(
+              initialStartDate: startDate,
+              initialEndDate: endDate,
+              hasInitialFilters: startDateStr != null || endDateStr != null,
+            );
+          },
           routes: [
             GoRoute(
               path: 'form',
-              builder: (context, state) => const ExpenseFormScreen(),
+              builder: (context, state) {
+                final expense = state.extra as Expense?;
+                return ExpenseFormScreen(expense: expense);
+              },
             ),
           ],
         ),

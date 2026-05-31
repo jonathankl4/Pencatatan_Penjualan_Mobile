@@ -24,11 +24,21 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Daftar Produk'),
-      ),
-      drawer: const AppDrawer(),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        } else {
+          context.go('/dashboard');
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Daftar Produk'),
+        ),
+        drawer: const AppDrawer(),
       body: Consumer<ProductProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading) {
@@ -49,6 +59,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
           return RefreshIndicator(
             onRefresh: () => provider.fetchProducts(),
             child: ListView.builder(
+              padding: const EdgeInsets.only(bottom: 88.0),
               itemCount: provider.products.length,
               itemBuilder: (context, index) {
                 final product = provider.products[index];
@@ -70,6 +81,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
         onPressed: () => context.push('/products/form'),
         child: const Icon(Icons.add),
       ),
-    );
+    ),);
   }
 }

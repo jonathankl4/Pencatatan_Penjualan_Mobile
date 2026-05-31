@@ -5,9 +5,11 @@ import '../../providers/sale_provider.dart';
 import '../../core/utils/currency_formatter.dart';
 import '../../core/utils/date_helper.dart';
 import '../../widgets/common/app_button.dart';
+import '../../models/sale.dart';
 
 class SaleFormScreen extends StatefulWidget {
-  const SaleFormScreen({super.key});
+  final Sale? sale;
+  const SaleFormScreen({super.key, this.sale});
 
   @override
   State<SaleFormScreen> createState() => _SaleFormScreenState();
@@ -20,6 +22,16 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.sale != null) {
+      for (var item in widget.sale!.items) {
+        _cart.add({
+          'product_id': item.productId,
+          'product_name': item.productName,
+          'sell_price': item.sellPrice,
+          'quantity': item.quantity,
+        });
+      }
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<SaleProvider>().fetchSuggestions();
     });
@@ -179,10 +191,16 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
     setState(() => _isLoading = true);
 
     final provider = context.read<SaleProvider>();
-    final success = await provider.addSale({
-      'sale_date': DateHelper.toIsoDate(DateTime.now()),
+    final isEdit = widget.sale != null;
+    
+    final payload = {
+      'sale_date': isEdit ? widget.sale!.saleDate : DateHelper.toIsoDate(DateTime.now()),
       'items': _cart,
-    });
+    };
+
+    final success = isEdit
+        ? await provider.editSale(widget.sale!.id, payload)
+        : await provider.addSale(payload);
 
     setState(() => _isLoading = false);
 
@@ -201,7 +219,7 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Buat Penjualan'),
+        title: Text(widget.sale != null ? 'Edit Penjualan' : 'Buat Penjualan'),
       ),
       body: Column(
         children: [

@@ -25,4 +25,15 @@ class Expense {
       expenseDate: json['expense_date'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'amount': amount,
+      'category': category,
+      'notes': notes,
+      'expense_date': expenseDate,
+    };
+  }
 }

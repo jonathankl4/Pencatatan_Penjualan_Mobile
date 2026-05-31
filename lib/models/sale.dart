@@ -36,4 +36,17 @@ class Sale {
       items: itemsList,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'sale_code': saleCode,
+      'total_cost': totalCost,
+      'total_revenue': totalRevenue,
+      'gross_profit': grossProfit,
+      'notes': notes,
+      'sale_date': saleDate,
+      'items': items.map((i) => i.toJson()).toList(),
+    };
+  }
 }

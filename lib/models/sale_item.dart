@@ -34,4 +34,18 @@ class SaleItem {
       subtotalProfit: double.parse(json['subtotal_profit'].toString()),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'product_id': productId,
+      'product_name': productName,
+      'cost_price': costPrice,
+      'sell_price': sellPrice,
+      'quantity': quantity,
+      'subtotal_cost': subtotalCost,
+      'subtotal_revenue': subtotalRevenue,
+      'subtotal_profit': subtotalProfit,
+    };
+  }
 }

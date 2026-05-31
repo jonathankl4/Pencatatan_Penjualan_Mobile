@@ -18,7 +18,7 @@ class DashboardService {
       );
       return DashboardSummary.fromJson(response.data['data']);
     } catch (e) {
-      throw Exception('Failed to load dashboard data');
+      throw Exception('Failed to load dashboard data: $e');
     }
   }
 }
